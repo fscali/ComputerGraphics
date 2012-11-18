@@ -49,6 +49,8 @@ const int DEMO = 5 ; // ** NEW ** To turn on and off features
 
 
 /* New helper transformation function to transform vector by modelview */ 
+// it is a matrix vector multiplier taking into account the fact that
+// opengl stores matrices in column-major order
 void transformvec (const GLfloat input[4], GLfloat output[4]) {
 	GLfloat modelview[16] ; // in column major order
 	glGetFloatv(GL_MODELVIEW_MATRIX, modelview) ; 
@@ -117,7 +119,7 @@ void display(void)
 		const GLfloat one[] = {1, 1, 1, 1};
 		const GLfloat medium[] = {0.5, 0.5, 0.5, 1};
 		const GLfloat small[] = {0.2, 0.2, 0.2, 1};
-		const GLfloat high[] = {100} ;
+		const GLfloat high[] = {100} ; //shininess
 		const GLfloat zero[] = {0.0, 0.0, 0.0, 1.0} ; 
 		const GLfloat light_specular[] = {1, 0.5, 0, 1};
 		//const GLfloat light_specular[] = {1, 1, 0, 1};
@@ -130,10 +132,27 @@ void display(void)
 		// Set Light and Material properties for the teapot
 		// Lights are transformed by current modelview matrix. 
 		// The shader can't do this globally. 
+		// because the lights are transformed by the modelview
+		// matrix at the time you hit the light command
+		// Whereas within the shader the modelview matrix could 
+		// be different for different vertices and fragments
 		// So we need to do so manually.  
+		// Lights transform like other geometry
+		// Only modelview matrix, not projection, because you're
+		// not projecting lights down, they operate in 3D spaces
+		//	types of light motion:
+		// Stationary: set the transforms to identity before
+		// specifying it
+		// Moving light: Push Matrix, move light, Pop Matrix
+		// Moving light source with viewpoint: (attached to camera)
+		// Can simply set light to 0 0 0 so origin wrt eye coords
+		// (make modelview matrix identity before doing this)
 		transformvec(light_direction, light0) ; 
 		transformvec(light_position1, light1) ; 
 
+		//set a uniform variable in the vertex or fragment shader
+		//its name is light0dirn, it is a vector that has only 
+		//one element and set it to light0
 		glUniform3fv(light0dirn, 1, light0) ; 
 		glUniform4fv(light0color, 1, light_specular) ; 
 		glUniform4fv(light1posn, 1, light1) ; 
@@ -148,7 +167,7 @@ void display(void)
 		// Enable and Disable everything around the teapot 
 		// Generally, we would also need to define normals etc. 
 		// But glut already does this for us 
-		if (DEMO > 4) 
+		if (DEMO > 4) //set a single integer (islight) to lighting
 			glUniform1i(islight,lighting) ; // turn on lighting only for teapot. 
 
 	}
@@ -339,6 +358,11 @@ void init (void)
 	GLint linked;
 	glGetProgramiv(shaderprogram, GL_LINK_STATUS, &linked) ;  
 
+	// set up the parameter mapping; for example I want
+	// to know where is the islight command in the shader
+	// this is the idiom that gets you that: glGetUniformLocation
+	//
+	//
 	// * NEW * Set up the shader parameter mappings properly for lighting.
 	islight = glGetUniformLocation(shaderprogram,"islight") ;        
 	light0dirn = glGetUniformLocation(shaderprogram,"light0dirn") ;       

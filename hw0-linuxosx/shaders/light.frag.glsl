@@ -10,8 +10,10 @@ varying vec4 color ;
 varying vec3 mynormal ; 
 varying vec4 myvertex ; 
 
+//the keyword uniform means that it remains the same over
+//different fragments, so it's the same over all the image
 uniform sampler2D tex ; 
-uniform int istex ; 
+uniform int istex ; //texture or not?
 uniform int islight ; // are we lighting. 
 
 // The commented code below hardcodes directions/colors
@@ -23,16 +25,17 @@ uniform int islight ; // are we lighting.
 // The actual light values are passed from the main OpenGL program. 
 // This could of course be fancier.  My goal is to illustrate a simple idea. 
 
-uniform vec3 light0dirn ; 
-uniform vec4 light0color ; 
-uniform vec4 light1posn ; 
-uniform vec4 light1color ; 
+uniform vec3 light0dirn ; //note that it is vec3
+uniform vec4 light0color ; //rgba
+uniform vec4 light1posn ;  //vec4
+uniform vec4 light1color ;  //rgba
 
 // Now, set the material parameters.  These could be varying and/or bound to 
 // a buffer.  But for now, I'll just make them uniform.  
 // I use ambient, diffuse, specular, shininess as in OpenGL.  
 // But, the ambient is just additive and doesn't multiply the lights.  
 
+//ambient,diffuse,specular are colors
 uniform vec4 ambient ; 
 uniform vec4 diffuse ; 
 uniform vec4 specular ; 
@@ -40,6 +43,7 @@ uniform float shininess ;
 
 vec4 ComputeLight (const in vec3 direction, const in vec4 lightcolor, const in vec3 normal, const in vec3 halfvec, const in vec4 mydiffuse, const in vec4 myspecular, const in float myshininess) {
 
+	//dot product of the normal and the direction of light
 	float nDotL = dot(normal, direction)  ;         
 	vec4 lambert = mydiffuse * lightcolor * max (nDotL, 0.0) ;  
 
@@ -59,12 +63,19 @@ void main (void)
 		// Also compute current fragment position and direction to eye 
 
 		const vec3 eyepos = vec3(0,0,0) ; 
+
+		//get the vertex location in eye coordinates
 		vec4 _mypos = gl_ModelViewMatrix * myvertex ; 
 		vec3 mypos = _mypos.xyz / _mypos.w ; // Dehomogenize current location 
+		//vector from my location to the eye
 		vec3 eyedirn = normalize(eyepos - mypos) ; 
 
 		// Compute normal, needed for shading. 
+
+		
 		// Simpler is vec3 normal = normalize(gl_NormalMatrix * mynormal) ; 
+		
+		//gl_NormalMatrix does this automatically
 		vec3 _normal = (gl_ModelViewMatrixInverseTranspose*vec4(mynormal,0.0)).xyz ; 
 		vec3 normal = normalize(_normal) ; 
 
