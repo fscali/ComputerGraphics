@@ -65,6 +65,7 @@ void main (void)
 		vec3 direction, position;
 		vec4 lc;
 
+		//weird trick to get rid of my old graphic card limitations
 		switch(i){
 			case 0:
 				 if (lightposn[0].w == 0){
