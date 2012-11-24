@@ -62,7 +62,6 @@ void display()
     // The shader can't do this globally. 
     // So we need to do so manually.  
     if (numused) {
-//        glUniform1i(enablelighting,false);
         glUniform1i(enablelighting,true);
 
         // YOUR CODE FOR HW 2 HERE.  
@@ -92,6 +91,7 @@ void display()
     sc = Transform::scale(sx,sy,1.0); 
     tr = Transform::translate(tx,ty,0.0); 
 
+
     //first we have to scale, then translate, and then movelview
     rightmultiply(mv, mystack);
     rightmultiply(glm::transpose(tr), mystack);
@@ -108,8 +108,6 @@ void display()
     glLoadMatrixf(&transf[0][0]); 
 
 
-    //rightmultiply(tr, mystack);
-    //rightmultiply(sc, mystack);
 
     for (int i = 0 ; i < numobjects ; i++) {
         object* obj = &(objects[i]); // Grabs an object struct.
@@ -121,16 +119,9 @@ void display()
 	mystack.push(mystack.top());
 
 	
-	//rightmultiply(obj->transform, mystack);
-
-
 	mat4 ot = mat4(1);
-//	ot = (transf * obj-> transform);
 	rightmultiply(obj->transform,mystack);
-//	ot = (transf * obj-> transform);
 
-	//glLoadMatrixf(&(mystack.top())[0][0]);
-	//glLoadMatrixf(&ot[0][0]);
 	glLoadMatrixf(&(mystack.top())[0][0]);
 
 	glUniform1f(shininesscol, obj->shininess);
